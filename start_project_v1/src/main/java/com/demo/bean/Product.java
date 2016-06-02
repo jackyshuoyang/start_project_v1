@@ -1,5 +1,20 @@
 package com.demo.bean;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+/***
+ * Entity Bean with JPA annotations
+ * Hibernate provides JPA implementation
+ * @author yang
+ *
+ */
+
+@Entity
+@Table(name="Products")
 public class Product {
 	public Product() {
 		super();
@@ -29,8 +44,19 @@ public class Product {
 	public void setFob(float fob) {
 		this.fob = fob;
 	}
+	
+	@Id
+	@GeneratedValue
+	@Column(name="productid")
 	private int id;
+	
+	
 	private String name;
 	private String imageUrl;
 	private float fob;
+	
+	@Override
+	public String toString(){
+		return "id"+id+", name="+name+", imageUrl="+imageUrl+", fob="+fob;
+	}
 }
