@@ -1,0 +1,24 @@
+<div class="alert alert-danger" ng-show="controller.newProduct.error">
+	There was a problem of adding this product.
+</div>
+
+
+<form role="form" ng-submit="controller.addNewProduct()">
+	<div class="form-group">
+		<label for="name">product name:</label> <input type="text"
+			class="form-control" id="productname" name="productname" ng-model="controller.newProduct.name"/>
+	</div>
+	<div class="form-group">
+		<label for="imageUrl">image:</label> <input type="text"
+			class="form-control" id="image" name="image" ng-model="controller.newProduct.imageUrl"/>
+	</div>
+	
+	<div class="form-group">
+		<label for="fob">F.O.B: </label> <input type="text"
+			class="form-control" id="image" name="fob" currency-input placeholder="insert currency value." ng-model="controller.newProduct.fob"/>
+	</div>
+	
+	
+	<button type="submit" class="btn btn-primary"> + Add</button>
+</form>
+<script></script>

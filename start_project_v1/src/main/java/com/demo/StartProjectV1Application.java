@@ -24,10 +24,13 @@ import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
+
+import com.demo.bean.Product;
 
 @RestController
 @SpringBootApplication
@@ -37,14 +40,19 @@ public class StartProjectV1Application {
 		SpringApplication.run(StartProjectV1Application.class, args);
 	}
 	
-	 @RequestMapping("/resource")
-	  public Map<String,Object> home() {
+	@RequestMapping("/resource")
+	public Map<String,Object> home() {
 	    Map<String,Object> model = new HashMap<String,Object>();
 	    model.put("id", UUID.randomUUID().toString());
 	    model.put("content", "Server provided data!!");
 	    return model;
-	  }
+	}
 	 
+	@RequestMapping("/insert_product")
+	public int addProduct(@RequestBody Product product){
+		System.out.println("yyyyyyyyyyy product : " + product.getName());
+		return  342342;
+	}
 	 
 	@RequestMapping("/user")
 	public Principal user(Principal user) {
@@ -60,7 +68,7 @@ public class StartProjectV1Application {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			http.httpBasic().and().authorizeRequests()
-					.antMatchers("/index.html", "/home.html", "/login.html", "/").permitAll().anyRequest()
+					.antMatchers("/index.html", "/home.html", "/login.html","/add_product.html", "/").permitAll().anyRequest()
 					.authenticated().and().csrf()
 					.csrfTokenRepository(csrfTokenRepository()).and()
 					.addFilterAfter(csrfHeaderFilter(), CsrfFilter.class);
