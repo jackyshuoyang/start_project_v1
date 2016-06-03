@@ -18,7 +18,7 @@ import javax.persistence.Table;
 public class Product {
 	public Product() {
 		super();
-		// TODO Auto-generated constructor stub
+		
 	}
 	public int getId() {
 		return id;
@@ -54,9 +54,15 @@ public class Product {
 	private String name;
 	private String imageUrl;
 	private float fob;
-	
+	private boolean valid=true;
 	@Override
 	public String toString(){
 		return "id"+id+", name="+name+", imageUrl="+imageUrl+", fob="+fob;
+	}
+	public boolean getValid() {
+		return valid;
+	}
+	public void setValid(boolean valid) {
+		this.valid = valid;
 	}
 }

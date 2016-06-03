@@ -2,7 +2,9 @@ package com.demo;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -63,6 +65,18 @@ public class StartProjectV1Application {
 	    model.put("content", "Server provided data!!");
 	    return model;
 	}
+	@RequestMapping("/products")
+	public List<Product> getProductList(){
+		ProductDAO productDAO = appContext.getBean(ProductDAO.class);
+		List<Product>list = productDAO.list();
+		return list;
+	}
+	@RequestMapping("/delete_product")
+	public String deleteProduct(int id)
+	{
+		ProductDAO productDAO = appContext.getBean(ProductDAO.class);
+		return productDAO.deleteProduct(id);
+	}
 	 
 	@RequestMapping("/insert_product")
 	public int addProduct(@RequestBody Product product){
@@ -85,7 +99,7 @@ public class StartProjectV1Application {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			http.httpBasic().and().authorizeRequests()
-					.antMatchers("/index.html", "/home.html", "/login.html","/add_product.html", "/").permitAll().anyRequest()
+					.antMatchers("/index.html", "/home.html", "/login.html","/add_product.html","/productlist.html", "/").permitAll().anyRequest()
 					.authenticated().and().csrf()
 					.csrfTokenRepository(csrfTokenRepository()).and()
 					.addFilterAfter(csrfHeaderFilter(), CsrfFilter.class);

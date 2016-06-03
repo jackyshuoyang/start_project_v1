@@ -1,0 +1,36 @@
+<div class="page-header">
+	<h3>Product List</h3>
+</div>
+<div class="button-group">
+	<button type="button" class="btn btn-primary"><a href="#/add_product">Add Product</a></button>
+	<button type="button" class="btn btn-primary"><a href="#/">Generate PDF</a></button>
+</div>
+<div>
+	<table st-table="controller.rowCollection" class="table table-striped">
+		<thead>
+		<tr>
+			<th></th>
+			<th st-sort="id">Product ID</th>
+			<th st-sort="name">Product Name</th>
+			<th st-sort="fob">F.O.B</th>
+		</tr>
+		<tr>
+			<th colspan="5"><input st-search="" class="form-control" placeholder="global search ..." type="text"/></th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr ng-repeat="row in controller.rowCollection">
+			<td cs-select="row"></td>
+			<td>{{row.id}}</td>
+			<td>{{row.name}}</td>
+			<td>{{row.fob | currency}}</td>
+			<td>
+				<button type="button" ng-click="removeItem(row)" class="btn btn-sm btn-danger">
+					<i class="glyphicon glyphicon-remove-circle">
+					</i>
+				</button>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+</div>

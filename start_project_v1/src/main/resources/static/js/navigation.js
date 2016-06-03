@@ -1,4 +1,4 @@
-angular.module('hello', [ 'ngRoute' ]).config(function($routeProvider, $httpProvider) {
+angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvider, $httpProvider) {
 
 	$routeProvider.when('/', {
 		templateUrl : 'home.html',
@@ -12,7 +12,12 @@ angular.module('hello', [ 'ngRoute' ]).config(function($routeProvider, $httpProv
 		templateUrl: 'add_product.html',
 		controller: 'addProduct',
 		controllerAs:'controller'
-	}).otherwise('/');
+	}).when('/products',{
+		templateUrl: 'productlist.html',
+		controller: 'productlistCtrl',
+		controllerAs:'controller'
+	})
+	.otherwise('/');
 
 	$httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
@@ -83,7 +88,38 @@ angular.module('hello', [ 'ngRoute' ]).config(function($routeProvider, $httpProv
 	
 	$http.get('/resource/').then(function(response) {
 		self.greeting = response.data;
-	})
+	});
+})
+.controller('productlistCtrl',function($http,$log){
+	var self = this;
+	self.rowCollection=[];
+	$http.get('/products/').then(function(response){
+		console.log(response.data);
+		self.rowCollection = response.data;
+	});
+	
+	self.removeItem = function(row){
+		
+		var res = $http.post('/delete_product/',row.id);
+		res.success(function(data,status,headers,config){
+			if(data=="success"){
+				var index = self.rowCollection.indexOf(row);
+				if(index!==-1){
+					self.rowCollection.splice(index,1);
+					self.error=false;
+				}
+			}else{
+				self.error = true;
+				self.errorMsg = "There is something wrong with deleting this product.";
+			}
+				
+		});
+		res.error(function(data,status,headers,config){
+			self.error = true;
+			self.errorMsg = "There is something wrong with deleting this product.[Details: "+data+"]";
+		});
+	}
+	
 })
 .controller('addProduct',function($http,$log,$scope){
 	self = this;

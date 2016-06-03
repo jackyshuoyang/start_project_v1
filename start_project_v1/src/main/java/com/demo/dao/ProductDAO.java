@@ -9,5 +9,7 @@ public interface ProductDAO {
 	public int save(Product p);
 	
 	public List<Product> list();
+	
+	public String deleteProduct(int id);
 
 }
