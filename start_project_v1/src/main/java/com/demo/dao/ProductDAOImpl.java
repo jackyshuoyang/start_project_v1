@@ -16,12 +16,14 @@ public class ProductDAOImpl implements ProductDAO {
 	}
 
 	@Override
-	public void save(Product p) {
+	public int save(Product p) {
+		int returnId=-1;
 		Session session = this.sessionFactory.openSession();
 		Transaction tx = session.beginTransaction();
 		session.persist(p);
 		tx.commit();
 		session.close();
+		return p.getId();
 	}
 
 	

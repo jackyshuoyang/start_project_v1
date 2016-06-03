@@ -13,10 +13,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -31,13 +34,26 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
 
 import com.demo.bean.Product;
+import com.demo.dao.ProductDAO;
 
 @RestController
 @SpringBootApplication
+@ImportResource("spring.xml")
 public class StartProjectV1Application {
 
+	public StartProjectV1Application() {
+		super();
+		
+	}
+	
+	@Autowired
+	private ApplicationContext appContext;
+
+    
 	public static void main(String[] args) {
+		
 		SpringApplication.run(StartProjectV1Application.class, args);
+		
 	}
 	
 	@RequestMapping("/resource")
@@ -50,8 +66,9 @@ public class StartProjectV1Application {
 	 
 	@RequestMapping("/insert_product")
 	public int addProduct(@RequestBody Product product){
-		System.out.println("yyyyyyyyyyy product : " + product.getName());
-		return  342342;
+		ProductDAO productDAO = appContext.getBean(ProductDAO.class);
+		int returnId =  productDAO.save(product);
+		return returnId;
 	}
 	 
 	@RequestMapping("/user")
