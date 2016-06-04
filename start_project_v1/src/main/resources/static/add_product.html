@@ -1,11 +1,13 @@
 <div class="alert alert-danger" ng-show="controller.newProduct.error">
-	There was a problem of adding this product.
+	<strong>Fail!</strong>There was a problem of adding this product.
 </div>
-
+<div class="alert alert-success" ng-show="controller.newProduct.success">
+	<strong>Success!</strong>added a new product
+</div>
 
 <form role="form" ng-submit="controller.addNewProduct()">
 	<div class="form-group">
-		<label for="name">product name:</label> <input type="text"
+		<label for="name">product name:</label> <input type="text" required
 			class="form-control" id="productname" name="productname" ng-model="controller.newProduct.name"/>
 	</div>
 	<div class="form-group">
@@ -14,12 +16,12 @@
 	</div>
 	
 	<div class="form-group">
-		<label for="fob">F.O.B: </label> <input type="text"
+		<label for="fob">F.O.B: </label> <input type="text" required
 			class="form-control" id="image" name="fob" currency-input placeholder="insert currency value." ng-model="controller.newProduct.fob"/>
 	</div>
 	
 	
 	<button type="submit" class="btn btn-primary"> + Add</button>
-	<button type="submit" class="btn btn-primary"> <a style="text-decoration:none; color=white" href="#/products"/>Back</button>
+	<button type="submit" class="btn btn-primary"  onclick="location.href='#/products';"> Back</button>
 </form>
 <script></script>

@@ -61,12 +61,10 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 			self.login = function() {
 				authenticate(self.credentials, function(authenticated) {
 					if (authenticated) {
-						console.log("Login succeeded")
 						$location.path("/");
 						self.error = false;
 						$rootScope.authenticated = true;
 					} else {
-						console.log("Login failed")
 						$location.path("/login");
 						self.error = true;
 						$rootScope.authenticated = false;
@@ -90,18 +88,21 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 		self.greeting = response.data;
 	});
 })
-.controller('productlistCtrl',function($http,$log){
+.controller('productlistCtrl',function($http){
 	var self = this;
 	self.rowCollection=[];
 	$http.get('/products/').then(function(response){
-		console.log(response.data);
-		self.rowCollection = response.data;
+		self.rowCollection=[];
+		var p;
+		for(p in response.data){
+			self.rowCollection.push(response.data[p]);
+		}
+		
 	});
 	
 	self.removeItem = function(row){
 		var res = $http.post('/delete_product',row);
 		res.success(function(data,status,headers,config){
-			console.log(data);
 			if(data>0){
 				var index = self.rowCollection.indexOf(row);
 				if(index!==-1){
@@ -122,7 +123,7 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 	}
 	
 })
-.controller('addProduct',function($http,$log,$scope){
+.controller('addProduct',function($http,$scope){
 	self = this;
 	self.newProduct={};
 	
@@ -130,12 +131,10 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 		
 		
 		var res = $http.post('/insert_product',self.newProduct);
-		$log.log("saved error: " + self.newProduct.error);
 		res.success(function(data,status,headers,config){
 			//adding to local list.
 			self.newProduct.id = data;
-			self.newProduct.error = false;
-			$log.log("self.newProduct.name:"+self.newProduct.name);
+			self.newProduct.success = true;
 			
 			alert(self.newProduct.name+" has been added, id is "+data+".");
 			self.newProduct={};
