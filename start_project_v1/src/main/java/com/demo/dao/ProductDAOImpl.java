@@ -38,14 +38,14 @@ public class ProductDAOImpl implements ProductDAO {
 	}
 
 	@Override
-	public String deleteProduct(int id) {
+	public int deleteProduct(Integer id) {
 		Session session = this.sessionFactory.openSession();
 		Transaction tx = session.beginTransaction();
-		Query query = session.createSQLQuery("update products set valid=false where id=:identifier");
+		Query query = session.createSQLQuery("update products set valid=false where productid=:identifier");
 		query.setParameter("identifier", id);
 		int result = query.executeUpdate();
 		tx.commit();
-		return result>0?"success":"fail";
+		return result;
 	}
 
 }

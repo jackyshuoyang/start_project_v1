@@ -71,11 +71,16 @@ public class StartProjectV1Application {
 		List<Product>list = productDAO.list();
 		return list;
 	}
+	/**
+	 * @param id
+	 * @return
+	 */
 	@RequestMapping("/delete_product")
-	public String deleteProduct(int id)
+	public int deleteProduct(@RequestBody Product p)
 	{
 		ProductDAO productDAO = appContext.getBean(ProductDAO.class);
-		return productDAO.deleteProduct(id);
+		int rowAffected = productDAO.deleteProduct(p.getId());
+		return rowAffected;
 	}
 	 
 	@RequestMapping("/insert_product")

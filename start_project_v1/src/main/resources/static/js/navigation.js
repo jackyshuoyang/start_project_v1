@@ -99,24 +99,25 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 	});
 	
 	self.removeItem = function(row){
-		
-		var res = $http.post('/delete_product/',row.id);
+		var res = $http.post('/delete_product',row);
 		res.success(function(data,status,headers,config){
-			if(data=="success"){
+			console.log(data);
+			if(data>0){
 				var index = self.rowCollection.indexOf(row);
 				if(index!==-1){
 					self.rowCollection.splice(index,1);
-					self.error=false;
+					self.success=true;
+					self.actionMsg = "product "+"' "+row.name+" '"+" has been deleted."
 				}
 			}else{
 				self.error = true;
-				self.errorMsg = "There is something wrong with deleting this product.";
+				self.actionMsg = "No product has been deleted.";
 			}
 				
 		});
 		res.error(function(data,status,headers,config){
 			self.error = true;
-			self.errorMsg = "There is something wrong with deleting this product.[Details: "+data+"]";
+			self.actionMsg = "There is something wrong with deleting this product.[Details: "+data+"]";
 		});
 	}
 	

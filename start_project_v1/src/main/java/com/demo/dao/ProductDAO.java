@@ -10,6 +10,6 @@ public interface ProductDAO {
 	
 	public List<Product> list();
 	
-	public String deleteProduct(int id);
+	public int deleteProduct(Integer id);
 
 }

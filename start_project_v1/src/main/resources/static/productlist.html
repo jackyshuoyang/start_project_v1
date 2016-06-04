@@ -1,3 +1,10 @@
+
+<div class="alert alert-success" ng-show="controller.success">
+	<strong>Success! </strong> {{controller.actionMsg}}
+</div>
+<div class="alert alert-danger" ng-show="controller.error">
+	<strong>Fail!</strong>{{controller.actionMsg}}
+</div>
 <div class="page-header">
 	<h3>Product List</h3>
 </div>
@@ -25,7 +32,7 @@
 			<td>{{row.name}}</td>
 			<td>{{row.fob | currency}}</td>
 			<td>
-				<button type="button" ng-click="removeItem(row)" class="btn btn-sm btn-danger">
+				<button type="button" ng-click="controller.removeItem(row)" class="btn btn-sm btn-danger">
 					<i class="glyphicon glyphicon-remove-circle">
 					</i>
 				</button>
