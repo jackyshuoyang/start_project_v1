@@ -35,8 +35,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
 
+import com.demo.bean.ProcurementOrder;
 import com.demo.bean.Product;
+import com.demo.bean.ProductOrderMapping;
+import com.demo.bean.ProductsInOrder;
+import com.demo.dao.ProcurementOrderDAO;
 import com.demo.dao.ProductDAO;
+import com.demo.dao.ProductOrderMappingDAO;
 
 @RestController
 @SpringBootApplication
@@ -56,6 +61,32 @@ public class StartProjectV1Application {
 		
 		SpringApplication.run(StartProjectV1Application.class, args);
 		
+	}
+	@RequestMapping("/get_products_for_order")
+	public List<ProductsInOrder> getProductsByOrderId(@RequestBody int orderId)
+	{
+		//initialization 
+		ProductOrderMappingDAO productOrderMapping = appContext.getBean(ProductOrderMappingDAO.class);
+		ProductDAO productDAO = appContext.getBean(ProductDAO.class);
+		
+		//get product list based on order id from mapping table
+		List<ProductOrderMapping> mapping = productOrderMapping.getProductMappingForOrder(orderId);
+		//get product details based on product id;
+		ArrayList<ProductsInOrder> returnList = new ArrayList<ProductsInOrder>();
+		for(int i=0;i<mapping.size();i++)
+		{
+			int productId = mapping.get(i).productId;
+			Product returnP = productDAO.getProductById(productId);
+			ProductsInOrder p = new ProductsInOrder();
+			p.setFob(returnP.getFob());
+			p.setId(returnP.getId());
+			p.setImageUrl(returnP.getImageUrl());
+			p.setName(returnP.getName());
+			p.setQty(mapping.get(i).qty);
+			p.setOrderId(orderId);
+			returnList.add(p);
+		}
+		return returnList;
 	}
 	
 	@RequestMapping("/resource")
@@ -89,6 +120,38 @@ public class StartProjectV1Application {
 		int returnId =  productDAO.save(product);
 		return returnId;
 	}
+	
+	@RequestMapping("/orders")
+	public List<ProcurementOrder> getProcurementOrders(){
+		ProcurementOrderDAO procurementOrderDAO = appContext.getBean(ProcurementOrderDAO.class);
+		return procurementOrderDAO.list();
+	}
+	
+	@RequestMapping("/delete_procurement_order")
+	public int deleteProcurementOrder(@RequestBody ProcurementOrder p){
+		ProcurementOrderDAO orderDAO = appContext.getBean(ProcurementOrderDAO.class);
+		int rowAffected = orderDAO.deleteProcurementOrder(p.getId());
+		ProductOrderMappingDAO mapDAO = appContext.getBean(ProductOrderMappingDAO.class);
+		//delete all mappings
+		mapDAO.deleteMappingBasedOnOrderId(p.getId());
+		
+		return rowAffected;
+	}
+	
+	@RequestMapping("/update_order")
+	public int updateOrSaveOrderDetails(@RequestBody ProcurementOrder p){
+		ProcurementOrderDAO pDAO = appContext.getBean(ProcurementOrderDAO.class);
+		int returnId =  pDAO.updateProcurementOrder(p);
+		return returnId;
+	}
+	
+	@RequestMapping("/remove_product_from_order")
+	public void deleteProductFromOrder(@RequestBody ProductsInOrder pInOrder){
+		ProductOrderMappingDAO pDAO = appContext.getBean(ProductOrderMappingDAO.class);
+		ProcurementOrderDAO procurementOrderDAO = appContext.getBean(ProcurementOrderDAO.class);
+		pDAO.deleteProductFromOrder(pInOrder.getId(), pInOrder.getOrderId());
+	}
+	
 	 
 	@RequestMapping("/user")
 	public Principal user(Principal user) {
@@ -104,7 +167,7 @@ public class StartProjectV1Application {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			http.httpBasic().and().authorizeRequests()
-					.antMatchers("/index.html", "/home.html", "/login.html","/add_product.html","/productlist.html", "/").permitAll().anyRequest()
+					.antMatchers("/index.html", "/home.html", "/login.html","/add_product.html","/productlist.html","/procurement_order.html", "/order_details.html","/").permitAll().anyRequest()
 					.authenticated().and().csrf()
 					.csrfTokenRepository(csrfTokenRepository()).and()
 					.addFilterAfter(csrfHeaderFilter(), CsrfFilter.class);

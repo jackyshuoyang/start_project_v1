@@ -12,4 +12,5 @@ public interface ProductDAO {
 	
 	public int deleteProduct(Integer id);
 
+	public Product getProductById(int id);
 }

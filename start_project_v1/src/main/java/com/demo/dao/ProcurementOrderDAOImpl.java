@@ -7,18 +7,18 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import com.demo.bean.Product;
+import com.demo.bean.ProcurementOrder;
 
-public class ProductDAOImpl implements ProductDAO {
+public class ProcurementOrderDAOImpl implements ProcurementOrderDAO {
+
 	
 	private SessionFactory sessionFactory;
 	public void setSessionFactory(SessionFactory sessionFactory){
 		this.sessionFactory = sessionFactory;
 	}
-
+	
 	@Override
-	public int save(Product p) {
-		int returnId=-1;
+	public int save(ProcurementOrder p) {
 		Session session = this.sessionFactory.openSession();
 		Transaction tx = session.beginTransaction();
 		session.persist(p);
@@ -27,38 +27,34 @@ public class ProductDAOImpl implements ProductDAO {
 		return p.getId();
 	}
 
-	
-	@SuppressWarnings("unchecked")
 	@Override
-	public List<Product> list() {
+	public List<ProcurementOrder> list() {
 		Session session = this.sessionFactory.openSession();
-		List<Product>productList = session.createQuery("from Product where valid=true").list();
+		List<ProcurementOrder>orderList = session.createQuery("from ProcurementOrder where valid=true").list();
 		session.close();
-		return productList;
+		return orderList;
 	}
 
 	@Override
-	public int deleteProduct(Integer id) {
+	public int deleteProcurementOrder(Integer id) {
 		Session session = this.sessionFactory.openSession();
 		Transaction tx = session.beginTransaction();
-		Query query = session.createSQLQuery("update products set valid=false where productid=:identifier");
+		Query query = session.createSQLQuery("update procurement_order set valid=false where id=:identifier");
 		query.setParameter("identifier", id);
 		int result = query.executeUpdate();
 		tx.commit();
 		return result;
 	}
-	
+
 	@Override
-	public Product getProductById(int id){
+	public int updateProcurementOrder(ProcurementOrder p) {
+		int returnId=-1;
 		Session session = this.sessionFactory.openSession();
-		Query q = session.createQuery("from Product where valid=true and id=:pid");
-		q.setParameter("pid", id);
-		List<Product>plist = q.list();
+		Transaction tx = session.beginTransaction();
+		session.saveOrUpdate(p);
+		tx.commit();
 		session.close();
-		if(plist.size()==1)
-			return plist.get(0);
-		else
-			return null;
+		return p.getId();
 	}
 
 }

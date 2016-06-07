@@ -1,0 +1,67 @@
+
+<div class="alert alert-success" ng-show="controller.success">
+	<strong>Success! </strong> {{controller.actionMsg}}
+</div>
+<div class="alert alert-danger" ng-show="controller.error">
+	<strong>Fail!</strong>{{controller.actionMsg}}
+</div>
+<div class="page-header">
+	<h3>Procurement Orders</h3>
+</div>
+<div class="button-group">
+	<button type="button" class="btn btn-primary"  onclick="location.href='#/add_order';">New Order</button>
+	<button type="button" class="btn btn-primary">FUNCTION</button>
+</div>
+<br/>
+<div>
+	<table st-table="controller.displayCollection" class="table table-bordered table-striped table-hover" st-safe-src="controller.rowCollection" >
+		<thead>
+		<tr>
+			<th colspan="11"><input st-search="" class="form-control" placeholder="global search ..." type="text"/></th>
+		</tr>
+		<tr>
+			
+			<th st-sort="id">ID</th>
+			<th st-sort="summary">Summary</th>
+			<th st-sort="manufactoryOrderId">Manufacture S/N</th>
+			<th st-sort="manufactoryName">Manufacture</th>
+			<th st-sort="status">Status</th>
+			<th st-sort="creationDate">Date of Logging</th>
+			<th st-sort="startDate">Start Date</th>
+			<th st-sort="daysDiff">Days</th>
+			<th st-sort="endDate">End Date</th>
+			<th st-sort="fob">F.O.B</th>
+			<th>Actions</th>
+		</tr>
+		
+		</thead>
+		<tbody>
+		<tr ng-repeat="row in controller.displayCollection">
+			<td>{{row.id}}</td>
+			<td>{{row.summary}}</td>
+			<td>{{row.manufactoryOrderId}}</td>
+			<td>{{row.manufactoryName}}</td>
+			<td valign="middle">
+				<div class="statusbox inprogress" ng-show="row.status==1"> In Progress</div>
+				<div class="statusbox premature" ng-show="row.status==0"> Negotiating</div>
+				<div class="statusbox complete" ng-show="row.status==2"> Completed</div>
+			
+			</td>
+			<td>{{row.creationDate | date:"MMM d, y h:mm"}}</td>
+			<td>{{row.startDate | date:"MMM d, y h:mm"}}</td>
+			<td>{{row.daysDiff}}</td>
+			<td>{{row.endDate | date:"MMM d, y h:mm"}}</td>
+			<td  align="right">{{row.fob | currency}}</td>
+			<td valign="middle">
+				<button title="Remove procurement order." type="button" mw-confirm-click="controller.removeItem(row)" mw-confirm-click-message="Are you sure you want to delete this order, It might has a lot of underlying information?" class="btn btn-xs btn-danger btn-pos">
+					<span class="glyphicon glyphicon-remove"></span>
+				</button>
+				<div class="divider"/>
+				<button title="View and modify procurement order details including products ordered, all events and logs." type="button" ng-click="controller.viewProcurementOrder(row)" class="btn btn-xs btn-success btn-pos">
+					<i class="glyphicon glyphicon-cog"></i>
+				</button>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+</div>

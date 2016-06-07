@@ -13,7 +13,7 @@
 	<button type="button" class="btn btn-primary">Generate PDF</button>
 </div>
 <div>
-	<table st-table="controller.displayCollection" class="table table-striped" st-safe-src="controller.rowCollection" >
+	<table st-table="controller.displayCollection" class="table table-striped table-align" st-safe-src="controller.rowCollection" >
 		<thead>
 		<tr>
 			<th></th>
@@ -32,9 +32,8 @@
 			<td>{{row.name}}</td>
 			<td  align="right">{{row.fob | currency}}</td>
 			<td>
-				<button type="button" ng-click="controller.removeItem(row)" class="btn btn-sm btn-danger">
-					<i class="glyphicon glyphicon-remove-circle">
-					</i>
+				<button type="button" ng-click="controller.removeItem(row)" class="btn btn-xs btn-danger btn-pos">
+					<span class="glyphicon glyphicon-remove-circle"></span>
 				</button>
 			</td>
 		</tr>

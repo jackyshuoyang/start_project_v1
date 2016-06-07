@@ -37,6 +37,8 @@
 		<property name="annotatedClasses">
 			<list>
 				<value>com.demo.bean.Product</value>
+				<value>com.demo.bean.ProcurementOrder</value>
+				<value>com.demo.bean.ProductOrderMapping</value>
 			</list>
 		</property>
 		<property name="hibernateProperties">
@@ -51,4 +53,15 @@
 	<bean id="productDAO" class="com.demo.dao.ProductDAOImpl">
 		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
 	</bean>
+	<bean id="procurementOrderDAO" class="com.demo.dao.ProcurementOrderDAOImpl">
+		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
+	</bean>
+	 
+	<bean id="productOrderMappingDAO" class="com.demo.dao.ProductOrderMappingDAOImpl">
+		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
+	</bean>
+	<bean id="eventLogDAO" class="com.demo.dao.EventLogDAOImpl">
+		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
+	</bean>
+	
 </beans>

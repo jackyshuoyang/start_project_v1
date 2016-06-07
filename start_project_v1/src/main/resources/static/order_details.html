@@ -1,0 +1,133 @@
+<div class="page-header">
+	<h3>Procurement Order for {{controller.order.summary}}</h3>
+</div>
+<div class="alert alert-info fade in" ng-show="controller.success">
+	<strong>Info! </strong> {{controller.actionMsg}}
+</div>
+<div class="alert alert-danger fade in" ng-show="controller.error">
+	<strong>Fail!</strong>{{controller.actionMsg}}
+</div>
+
+
+<div class="container">
+	<form class="form-horizontal" role="form">
+	<fieldset disabled>	
+	<div class="form-group">
+		<label class="col-sm-2 control-label" for="id">id</label>
+		<div class="col-sm-10">
+			<input class="form-control" type="text" ng-model="controller.order.id">
+		</div>
+	</div>
+	</fieldset>
+	<div class="form-group">
+		<label class="col-sm-2 control-label" for="summary">Summary</label>
+		<div  class="col-sm-10">
+			<input type="text" class="form-control" ng-model="controller.order.summary"/>
+		</div>
+	</div>
+	
+	<div class="form-group">
+		<label class="col-sm-2 control-label" for="manufactoryOrderId">Manufacture Contract S/N</label>
+		<div  class="col-sm-10">
+			<input type="text" class="form-control" ng-model="controller.order.manufactoryOrderId"/>
+		</div>
+	</div>
+	<div class="form-group">
+		<label class="col-sm-2 control-label" for="manufactoryName">Manufacture</label>
+		<div class="col-sm-10">
+			<input type="text" class="form-control" ng-model="controller.order.manufactoryName"/>
+		</div>
+	</div>
+	<div class="form-group">
+		<label class="col-sm-2 control-label" for="status">Status</label>
+		<div  class="col-sm-10">
+				<div class="form-control statusbox inprogress" ng-show="controller.order.status==1">In Progress</div>
+				<div class="form-control statusbox premature" ng-show="controller.order.status==0"> Negotiating</div>
+			<div class="form-control statusbox complete" ng-show="controller.order.status==2"> Completed</div>
+		</div>
+	</div>
+	<fieldset disabled>
+		<div class="form-group">
+			<label class="col-sm-2 control-label" for="creationDate">Date of Logging</label>
+			<div  class="col-sm-10">
+				<label class="form-control">{{controller.order.creationDate | date}}</label>
+			</div>
+		</div>
+			
+		<div class="form-group">
+			<label class="col-sm-2 control-label" for="startDate">Start Date/Contract Date</label>
+				<div  class="col-sm-10">
+					<label class="form-control">{{controller.order.startDate | date}}</label>
+				</div>
+		</div>
+			
+		<div class="form-group">
+			<label class="col-sm-2 control-label" for="Days from Start Date">Days From Start Date</label>
+			<div  class="col-sm-10">
+				<label class="form-control">{{controller.order.daysDiff}} days</label>
+			</div>
+		</div>
+			
+		<div class="form-group">
+			<label class="col-sm-2 control-label" for="endDate">End Date</label>
+			<div  class="col-sm-10">
+				<label class="form-control">{{controller.order.endDate | date}}</label>
+			</div>
+		</div>
+			
+		<div class="form-group">
+			<label class="col-sm-2 control-label" for="fob">F.O.B</label>
+			<div  class="col-sm-10">
+				<label class="form-control">{{controller.order.fob | currency}}</label>
+			</div>
+		</div>
+	</fieldset>
+	<div class="form-group">
+		<div class="col-sm-2 control-label"></div>
+		<div class="col-sm-10">
+			<button type="button" class="btn btn-primary" ng-click="controller.updateOrderDetails();">Update</button>
+			<button type="button" class="btn btn-primary" ng-click="controller.revertValue();">Revert</button>
+			<button type="button" class="btn btn-primary"  onclick="location.href='#/orders';">Back to Order List</button>
+		</div>
+	</div>
+	</form>
+</div>
+
+
+<div class="panel panel-default">
+	<div class="panel-heading">Products Ordered</div>
+	<div class="panel-body">
+    	<button type="button" class="btn btn-primary"  onclick="location.href='#/add_product_to_order';">Add Product to Order</button>
+			
+      
+		<table st-table="controller.displayProductCollection" class="table table-bordered table-align" st-safe-src="controller.productCollection" >
+			<thead>
+			<tr>
+				<th st-sort="id">Product ID</th>
+				<th st-sort="name">Product Name</th>
+				<th st-sort="fob">F.O.B</th>
+				<th st-sort="qty">Quantity</th>
+				<th>Action</th>
+			</tr>
+			<tr>
+				<th colspan="5"><input st-search="" class="form-control" placeholder="global search ..." type="text"/></th>
+			</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="productRow in controller.displayProductCollection">
+					<td>{{productRow.id}}</td>
+					<td>{{productRow.name}}</td>
+					<td  align="right">{{productRow.fob | currency}}</td>
+					<td  align="right">{{productRow.qty}}</td>
+					<td>
+						<button type="button" ng-click="controller.removeProductFromOrder(productRow)" class="btn btn-sm btn-danger">
+						<i class="glyphicon glyphicon-remove-circle"></i>
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+	</div>
+</div>
+
