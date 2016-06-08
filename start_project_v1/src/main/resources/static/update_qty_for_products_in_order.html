@@ -1,0 +1,42 @@
+<div class="alert alert-danger" ng-show="controller.error">
+	<strong>Fail!</strong>{{controller.errorMsg}}
+</div>
+
+<div class="page-header">
+	<h3>Change Product Quantity for Order</h3>
+</div>
+
+<div class="container">
+	
+<form role="form" class="form-horizontal">
+	<div class="form-group">
+		<label class="col-sm-2 control-label" for="summary">Procurement Order Summary</label>
+		<div  class="col-sm-10">
+			<Label class="form-control">{{controller.summary}}</Label>
+		</div>
+	</div>
+	
+	<div class="form-group">
+		<label class="col-sm-2 control-label" for="productName">Product Name</label>
+		<div  class="col-sm-10">
+			<Label class="form-control">{{controller.productName}}</Label> 
+		</div>
+	</div>
+	
+	<div class="form-group">
+		<label class="col-sm-2 control-label" for="Days from Start Date" auto-focus>Quantity</label>
+		<div  class="col-sm-10">
+			<input class="form-control" ng-model="controller.qty"/> 
+		</div>
+	</div>
+	
+	<div class="form-group">
+		<div class="col-sm-2 control-label"></div>
+		<div  class="col-sm-10">
+			<button type="button" class="btn btn-primary" ng-click="controller.updateQuantity()">Update</button>
+		</div>
+	</div>
+</form>
+
+</div>
+<br/>

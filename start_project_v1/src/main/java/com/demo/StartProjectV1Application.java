@@ -3,6 +3,7 @@ package com.demo;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,14 @@ public class StartProjectV1Application {
 		return returnList;
 	}
 	
+	@RequestMapping("/updateProductQtyForOrder")
+	public void updateProductQtyForOrder(@RequestBody ProductOrderMapping mapping){
+		//initialization 
+		ProductOrderMappingDAO productOrderMapping = appContext.getBean(ProductOrderMappingDAO.class);
+		productOrderMapping.updateMapping(mapping);	
+		
+	}
+	
 	@RequestMapping("/resource")
 	public Map<String,Object> home() {
 	    Map<String,Object> model = new HashMap<String,Object>();
@@ -112,6 +121,14 @@ public class StartProjectV1Application {
 		ProductDAO productDAO = appContext.getBean(ProductDAO.class);
 		int rowAffected = productDAO.deleteProduct(p.getId());
 		return rowAffected;
+	}
+	
+	@RequestMapping("/insert_order")
+	public void addOrder(@RequestBody ProcurementOrder order)
+	{
+		ProcurementOrderDAO orderDAO= appContext.getBean(ProcurementOrderDAO.class);
+		order.setCreationDate(new Date());
+		orderDAO.save(order);
 	}
 	 
 	@RequestMapping("/insert_product")
@@ -152,6 +169,13 @@ public class StartProjectV1Application {
 		pDAO.deleteProductFromOrder(pInOrder.getId(), pInOrder.getOrderId());
 	}
 	
+	@RequestMapping("/insert_product_to_order")
+	public void addProductToOrder(@RequestBody ProductOrderMapping mapping){
+		ProductOrderMappingDAO pDAO = appContext.getBean(ProductOrderMappingDAO.class);
+		pDAO.saveProductAndOrderMaps(mapping);
+	}
+	
+	
 	 
 	@RequestMapping("/user")
 	public Principal user(Principal user) {
@@ -167,7 +191,7 @@ public class StartProjectV1Application {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			http.httpBasic().and().authorizeRequests()
-					.antMatchers("/index.html", "/home.html", "/login.html","/add_product.html","/productlist.html","/procurement_order.html", "/order_details.html","/").permitAll().anyRequest()
+					.antMatchers("/index.html", "/home.html", "/login.html","/add_product.html","/productlist.html","/procurement_order.html", "/order_details.html","/create_order.html","/").permitAll().anyRequest()
 					.authenticated().and().csrf()
 					.csrfTokenRepository(csrfTokenRepository()).and()
 					.addFilterAfter(csrfHeaderFilter(), CsrfFilter.class);

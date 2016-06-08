@@ -18,9 +18,42 @@ public class ProductOrderMappingDAOImpl implements ProductOrderMappingDAO {
 	}
 	
 	@Override
-	public void saveProductAndOrderMaps(List<ProductOrderMapping> pArray) {
-		// TODO Auto-generated method stub
-
+	public void saveProductAndOrderMaps(ProductOrderMapping map){
+		Session session = this.sessionFactory.openSession();
+		Transaction tx=session.beginTransaction();
+		try{
+			session.persist(map);
+			invalidateFobForOrder(map.orderId, session);
+			tx.commit();
+		}catch(Exception e){
+			tx.rollback();
+		}finally{
+			session.close();
+		}
+	}
+	
+	@Override
+	public void updateMapping(ProductOrderMapping p){
+		Session session = this.sessionFactory.openSession();
+		Transaction tx = session.beginTransaction();
+		if(p.qty==0){
+			deleteProductFromOrder(p.productId, p.orderId);
+		}else{
+			try{
+				Query q =session.createSQLQuery("update order_product_maps set qty=:pQty where order_id=:pOrderId and product_id=:pProductId");
+				q.setParameter("pQty", p.qty);
+				q.setParameter("pOrderId", p.orderId);
+				q.setParameter("pProductId", p.productId);
+				q.executeUpdate();
+				invalidateFobForOrder(p.orderId, session);
+				tx.commit();
+			}catch(Exception e){
+				tx.rollback();
+			}finally{
+				session.close();
+			}
+		}
+		
 	}
 
 	@Override
@@ -42,6 +75,26 @@ public class ProductOrderMappingDAOImpl implements ProductOrderMappingDAO {
 		session.close();
 	}
 	
+	private void invalidateFobForOrder(int orderId, Session session)
+	{
+		Query q = session.createQuery("from ProductOrderMapping where valid=true and orderId=:pOrderId");
+		q.setParameter("pOrderId", orderId);
+		List<ProductOrderMapping>mappingList = q.list();
+		List<Product> productList;
+		double totalFob=0;
+		for(int i=0;i<mappingList.size();i++){
+			q = session.createQuery("from Product where valid=true and id=:pid");
+			q.setParameter("pid", mappingList.get(i).productId);
+			productList = q.list();
+			totalFob += productList.get(0).getFob() * mappingList.get(i).qty;
+		}
+		
+		q = session.createSQLQuery("update procurement_order set fob=:qFob where id=:qId");
+		q.setParameter("qFob", totalFob);
+		q.setParameter("qId", orderId);
+		q.executeUpdate();
+	}
+	
 	@Override
 	public void deleteProductFromOrder(int productId,int orderId){
 		Session session = this.sessionFactory.openSession();
@@ -54,24 +107,8 @@ public class ProductOrderMappingDAOImpl implements ProductOrderMappingDAO {
 				q.setParameter("qproductID", productId);
 				q.executeUpdate();
 				
-				q = session.createQuery("from ProductOrderMapping where valid=true and orderId=:pOrderId");
-				q.setParameter("pOrderId", orderId);
-				List<ProductOrderMapping>mappingList = q.list();
-				List<Product> productList;
-				double totalFob=0;
-				for(int i=0;i<mappingList.size();i++){
-					if(mappingList.get(i).productId!=productId){
-						q = session.createQuery("from Product where valid=true and id=:pid");
-						q.setParameter("pid", mappingList.get(i).productId);
-						productList = q.list();
-						totalFob += productList.get(0).getFob() * mappingList.get(i).qty;
-					}
-				}
+				invalidateFobForOrder(orderId, session);
 				
-				q = session.createSQLQuery("update procurement_order set fob=:qFob where id=:qId");
-				q.setParameter("qFob", totalFob);
-				q.setParameter("qId", orderId);
-				q.executeUpdate();
 				tx.commit();
 		}catch(Exception e){
 			tx.rollback();

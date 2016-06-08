@@ -30,7 +30,7 @@ public class ProcurementOrderDAOImpl implements ProcurementOrderDAO {
 	@Override
 	public List<ProcurementOrder> list() {
 		Session session = this.sessionFactory.openSession();
-		List<ProcurementOrder>orderList = session.createQuery("from ProcurementOrder where valid=true").list();
+		List<ProcurementOrder>orderList = session.createQuery("from ProcurementOrder where valid=true order by id desc").list();
 		session.close();
 		return orderList;
 	}

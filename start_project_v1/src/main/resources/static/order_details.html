@@ -50,14 +50,14 @@
 		<div class="form-group">
 			<label class="col-sm-2 control-label" for="creationDate">Date of Logging</label>
 			<div  class="col-sm-10">
-				<label class="form-control">{{controller.order.creationDate | date}}</label>
+				<label class="form-control">{{controller.order.creationDate | date:"MMM d, y h:mm"}}</label>
 			</div>
 		</div>
 			
 		<div class="form-group">
 			<label class="col-sm-2 control-label" for="startDate">Start Date/Contract Date</label>
 				<div  class="col-sm-10">
-					<label class="form-control">{{controller.order.startDate | date}}</label>
+					<label class="form-control">{{controller.order.startDate | date:"MMM d, y h:mm"}}</label>
 				</div>
 		</div>
 			
@@ -71,7 +71,7 @@
 		<div class="form-group">
 			<label class="col-sm-2 control-label" for="endDate">End Date</label>
 			<div  class="col-sm-10">
-				<label class="form-control">{{controller.order.endDate | date}}</label>
+				<label class="form-control">{{controller.order.endDate | date:"MMM d, y h:mm"}}</label>
 			</div>
 		</div>
 			
@@ -120,9 +120,14 @@
 					<td  align="right">{{productRow.fob | currency}}</td>
 					<td  align="right">{{productRow.qty}}</td>
 					<td>
-						<button type="button" ng-click="controller.removeProductFromOrder(productRow)" class="btn btn-sm btn-danger">
+						<button type="button" ng-click="controller.removeProductFromOrder(productRow)" class="btn btn-xs btn-danger btn-pos">
 						<i class="glyphicon glyphicon-remove-circle"></i>
 						</button>
+						<div class="divider"/>
+						<button type="button" ng-click="controller.updateQty(productRow)" class="btn btn-xs btn-success btn-pos">
+						<i class="glyphicon glyphicon-pencil"></i>
+						</button>
+						
 					</td>
 				</tr>
 			</tbody>

@@ -6,7 +6,7 @@ import com.demo.bean.ProductOrderMapping;
 
 public interface ProductOrderMappingDAO {
 	
-	public void saveProductAndOrderMaps(List<ProductOrderMapping> pArray);
+	public void saveProductAndOrderMaps(ProductOrderMapping map);
 	
 	public List<ProductOrderMapping> getProductMappingForOrder(int orderId);
 	
@@ -14,5 +14,5 @@ public interface ProductOrderMappingDAO {
 	
 	public void deleteProductFromOrder(int productId,int orderId);
 	
-
+	public void updateMapping(ProductOrderMapping p);
 }

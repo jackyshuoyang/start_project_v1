@@ -25,14 +25,38 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 		templateUrl: 'order_details.html',
 		controller: 'procurementOrderCtrl',
 		controllerAs:'controller'
+	}).when('/create_new_order',{
+		templateUrl: 'create_order.html',
+		controller: 'addOrderCtrl',
+		controllerAs:'controller'
+	}).when('/update_product_qty_for_order',{
+		templateUrl: 'update_qty_for_products_in_order.html',
+		controller: 'updateQtyCtrl',
+		controllerAs:'controller'
+	}).when('/add_product_to_order',{
+		templateUrl: 'add_product_to_order.html',
+		controller: 'addProductToOrderCtrl',
+		controllerAs:'controller'
 	}).otherwise('/');
 
 	$httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
+}).service('updateProductQtyForOrderService',function(){
+	var selectedProductOrderMap={};
+	return selectedProductOrderMap;
 }).service('procurementOrderShareService',function(){
 	//this service is for sharing selected procurementOrder between procurementOrderList and procurementOrder page.
 	var selectedOrder={};
 	return selectedOrder;
+}).directive('autoFocus', function($timeout) {
+    return {
+        restrict: 'AC',
+        link: function(_scope, _element) {
+            $timeout(function(){
+                _element[0].focus();
+            }, 0);
+        }
+    };
 }).directive( "mwConfirmClick", [
     function( ) {
     	return {
@@ -180,8 +204,6 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 	
 	self.viewProcurementOrder = function(row){
 		procurementOrderShareService.selectedOrder = row;
-		console.log("procurementOrderShareService in order list:");
-		console.log( procurementOrderShareService.selectedOrder);
 		$window.location.href = '#/view_procurement_order';
 	};
 	
@@ -208,7 +230,7 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 	};
 	
 	
-}).controller('procurementOrderCtrl',function(procurementOrderShareService,$http,$scope){
+}).controller('procurementOrderCtrl',function(procurementOrderShareService,updateProductQtyForOrderService,$http,$scope,$window){
 	
 	self = this;
 	
@@ -219,15 +241,12 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 	
 	var res = $http.post("/get_products_for_order",self.order.id);
 	res.success(function(data,status,headers,config){
-		console.log(data);
 		self.productCollection = data;
 		var totalFob = calculateOrderFobFromProductSum();
-		console.log("TOTAL FOB: " + totalFob);
 		
 		if(self.order.fob!==totalFob){
 			self.order.fob = totalFob;
 			orderMemoto.fob = totalFob;
-			console.log("inconsistent fob -> updateProcurementOrder");
 			updateProcurementOrder();
 		}
 	});
@@ -275,6 +294,17 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 		self.order.fob = totalFob;
 	}
 	
+	self.updateQty = function(productRow){
+		updateProductQtyForOrderService.orderId = self.order.id;
+		updateProductQtyForOrderService.productId = productRow.id;
+		updateProductQtyForOrderService.orderSummary = self.order.summary;
+		updateProductQtyForOrderService.productName = productRow.name;
+		updateProductQtyForOrderService.qty = productRow.qty;
+		updateProductQtyForOrderService.selectedOrder = self.order;
+		
+		$window.location.href = '#/update_product_qty_for_order';
+	}
+	
 	self.removeProductFromOrder=function(productRow){
 		/*remove products from order will trigger 
 		 * 1, delete mapping reference from mapping table
@@ -301,8 +331,127 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 		});
 	};
 	
+}).controller('addProductToOrderCtrl',function($http,$window,addProductToOrderService,procurementOrderShareService){
+	self = this;
+	self.selectedOrder = addProductToOrderService.selectedOrder;
+	self.productMapList = addProductToOrderService.productMapList;
+	self.qty=0;
+	loadAllProducts();
+	
+	function loadAllProducts(){
+		self.productCollection=[];
+		$http.get('/products/').then(function(response){
+			self.productCollection=[];
+			var p;
+			for(p in response.data){
+				if(inTheList(p.id)==false){
+					self.productCollection.push(response.data[p]);
+				}
+			}
+			
+		});
+	}
+	
+	function inTheList(productId){
+		for(p in self.productMapList){
+			self.productMapList[p].productId ==productId;
+			return true;
+		}
+		return false;
+	}
+	
+	loadAllProducts();
+	
+	self.addProductAndOrderMapping = function(){
+		var productSelected = self.productCollection.filter(function(item){return item.isSelected===true;});
+		if(productSelected==null){
+			self.error=true;
+			self.actionMsg = "Please select at least one product.";
+		}else if(self.qty==0){
+			self.error=true;
+			self.actionMsg = "Quantity must be greater than 0.";
+		}else{
+			var sendingMap={};
+			sendingMap.id=0;
+			sendingMap.productId = productSelected.id;
+			sendingMap.orderId = self.selectedOrder.id;
+			sendingMap.qty = self.qty;
+			var res = $http.post("/insert_product_to_order",sendingMap);
+			res.success(function(data,status,headers,config){
+				procurementOrderShareService.selectedOrder = self.selectedOrder;
+				$window.location.href = '#/view_procurement_order';
+			});
+			
+			res.error(function(data,status,headers,config){
+				self.error = true;
+				self.actionMsg = "There is something wrong with updating this orders.[Details: "+data+"]";
+			});
+			
+		}
+	};
 	
 	
+	
+}).controller('updateQtyCtrl',function($http,$window,updateProductQtyForOrderService,procurementOrderShareService){
+	self = this;
+	self.orderId = updateProductQtyForOrderService.orderId;
+	self.productId = updateProductQtyForOrderService.productId;
+	self.summary = updateProductQtyForOrderService.orderSummary;
+	self.productName = updateProductQtyForOrderService.productName;	
+	self.qty = updateProductQtyForOrderService.qty;
+	self.qtyMomento = updateProductQtyForOrderService.qty;
+	self.selectedOrder = updateProductQtyForOrderService.selectedOrder;
+	
+	self.updateQuantity = function(){
+		if(self.qty!=self.qtyMomento){
+			var productOrderMapping = {};
+			productOrderMapping.id=0;
+			productOrderMapping.orderId = self.orderId;
+			productOrderMapping.productId = self.productId;
+			productOrderMapping.qty = self.qty;
+			console.log("fire  ->self:: orderid"+self.orderId);
+			console.log("fire ->self:: productId"+self.productId);
+			console.log("fire ->self:: qty"+self.qty);
+			console.log("fire  ->productOrderMapping:: orderid "+productOrderMapping.orderId);
+			console.log("fire ->productOrderMapping:: pid "+productOrderMapping.productId);
+			console.log("fire ->productOrderMapping:: qty "+productOrderMapping.qty);
+			var res = $http.post("/updateProductQtyForOrder",productOrderMapping);
+			res.success(function(data,status,headers,config){
+				procurementOrderShareService.selectedOrder = self.selectedOrder;
+				$window.location.href = '#/view_procurement_order';
+			});
+			
+			res.error(function(data,status,headers,config){
+				self.error = true;
+				self.actionMsg = "There is something wrong with updating this orders.[Details: "+data+"]";
+			});
+		}
+		
+	}
+	
+}).controller('addOrderCtrl',function($http,$window){
+	self = this;
+	self.newOrder = {};
+	self.newOrder.creationDate = new Date();
+	self.newOrder.status = 0;
+	self.newOrder.startDate = null;
+	self.newOrder.endDate = null;
+	self.newOrder.fob = 0;
+	self.newOrder.summary = "";
+	self.newOrder.manufactoryOrderId = "";
+	self.newOrder.ManufactoryName="";
+	
+	self.addNewOrder = function(){
+		var res = $http.post('/insert_order',self.newOrder);
+		res.success(function(data,status,headers,config){
+			$window.location.href = '#/orders';
+		});
+		res.error(function(data,status,headers,config){
+			self.error = true;
+			self.errorMsg = "There is something wrong with initializing new procurement order."
+		});
+		
+	}
 	
 	
 }).controller('addProduct',function($http,$scope){
