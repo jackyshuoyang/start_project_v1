@@ -171,6 +171,7 @@ public class StartProjectV1Application {
 	
 	@RequestMapping("/insert_product_to_order")
 	public void addProductToOrder(@RequestBody ProductOrderMapping mapping){
+	
 		ProductOrderMappingDAO pDAO = appContext.getBean(ProductOrderMappingDAO.class);
 		pDAO.saveProductAndOrderMaps(mapping);
 	}
@@ -191,7 +192,7 @@ public class StartProjectV1Application {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			http.httpBasic().and().authorizeRequests()
-					.antMatchers("/index.html", "/home.html", "/login.html","/add_product.html","/productlist.html","/procurement_order.html", "/order_details.html","/create_order.html","/").permitAll().anyRequest()
+					.antMatchers("/index.html", "/home.html", "/login.html","/add_product.html","/productlist.html","/procurement_order.html", "/order_details.html","/create_order.html","/show_line.html","/").permitAll().anyRequest()
 					.authenticated().and().csrf()
 					.csrfTokenRepository(csrfTokenRepository()).and()
 					.addFilterAfter(csrfHeaderFilter(), CsrfFilter.class);

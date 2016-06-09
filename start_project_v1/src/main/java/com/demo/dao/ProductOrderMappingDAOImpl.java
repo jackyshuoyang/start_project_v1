@@ -22,6 +22,7 @@ public class ProductOrderMappingDAOImpl implements ProductOrderMappingDAO {
 		Session session = this.sessionFactory.openSession();
 		Transaction tx=session.beginTransaction();
 		try{
+			
 			session.persist(map);
 			invalidateFobForOrder(map.orderId, session);
 			tx.commit();

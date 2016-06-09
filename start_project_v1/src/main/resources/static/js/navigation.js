@@ -37,10 +37,17 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 		templateUrl: 'add_product_to_order.html',
 		controller: 'addProductToOrderCtrl',
 		controllerAs:'controller'
-	}).otherwise('/');
+	}).when('/show_line',{
+		templateUrl: 'show_line.html',
+		controller: 'showlineCtrl',
+		controllerAs:'controller'
+	}).
+	otherwise('/');
 
 	$httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
+}).service('addProductToOrderService',function(){
+	var productMapList={};
+	return productMapList;
 }).service('updateProductQtyForOrderService',function(){
 	var selectedProductOrderMap={};
 	return selectedProductOrderMap;
@@ -48,15 +55,6 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 	//this service is for sharing selected procurementOrder between procurementOrderList and procurementOrder page.
 	var selectedOrder={};
 	return selectedOrder;
-}).directive('autoFocus', function($timeout) {
-    return {
-        restrict: 'AC',
-        link: function(_scope, _element) {
-            $timeout(function(){
-                _element[0].focus();
-            }, 0);
-        }
-    };
 }).directive( "mwConfirmClick", [
     function( ) {
     	return {
@@ -230,7 +228,7 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 	};
 	
 	
-}).controller('procurementOrderCtrl',function(procurementOrderShareService,updateProductQtyForOrderService,$http,$scope,$window){
+}).controller('procurementOrderCtrl',function(procurementOrderShareService,addProductToOrderService,updateProductQtyForOrderService,$http,$scope,$window){
 	
 	self = this;
 	
@@ -242,6 +240,10 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 	var res = $http.post("/get_products_for_order",self.order.id);
 	res.success(function(data,status,headers,config){
 		self.productCollection = data;
+		
+		addProductToOrderService.productMapList = self.productCollection;
+		console.log("addProductToOrderService:");
+		console.log(addProductToOrderService.productMapList);
 		var totalFob = calculateOrderFobFromProductSum();
 		
 		if(self.order.fob!==totalFob){
@@ -333,8 +335,11 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 	
 }).controller('addProductToOrderCtrl',function($http,$window,addProductToOrderService,procurementOrderShareService){
 	self = this;
-	self.selectedOrder = addProductToOrderService.selectedOrder;
+	self.selectedOrder = procurementOrderShareService.selectedOrder;
 	self.productMapList = addProductToOrderService.productMapList;
+	console.log("addProductTOOrderCTRL : ");
+	console.log(addProductToOrderService.productMapList);
+	
 	self.qty=0;
 	loadAllProducts();
 	
@@ -344,27 +349,28 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 			self.productCollection=[];
 			var p;
 			for(p in response.data){
-				if(inTheList(p.id)==false){
+				if(inTheList(response.data[p].id)==false){
 					self.productCollection.push(response.data[p]);
 				}
 			}
-			
 		});
 	}
 	
 	function inTheList(productId){
+		if(self.productMapList==null)return false;
 		for(p in self.productMapList){
-			self.productMapList[p].productId ==productId;
-			return true;
+			if(self.productMapList[p].id ==productId)
+				return true;
 		}
 		return false;
 	}
 	
-	loadAllProducts();
 	
 	self.addProductAndOrderMapping = function(){
 		var productSelected = self.productCollection.filter(function(item){return item.isSelected===true;});
-		if(productSelected==null){
+		
+		
+		if(productSelected[0]==null){
 			self.error=true;
 			self.actionMsg = "Please select at least one product.";
 		}else if(self.qty==0){
@@ -373,9 +379,13 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 		}else{
 			var sendingMap={};
 			sendingMap.id=0;
-			sendingMap.productId = productSelected.id;
+			console.log(" productSelected.id :");
+			console.log(productSelected[0]);
+			sendingMap.productId = productSelected[0].id;
 			sendingMap.orderId = self.selectedOrder.id;
 			sendingMap.qty = self.qty;
+			console.log(" sendingMap :");
+			console.log(sendingMap);
 			var res = $http.post("/insert_product_to_order",sendingMap);
 			res.success(function(data,status,headers,config){
 				procurementOrderShareService.selectedOrder = self.selectedOrder;

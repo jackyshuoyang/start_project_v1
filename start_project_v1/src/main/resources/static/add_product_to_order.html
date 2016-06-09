@@ -2,6 +2,13 @@
 self.selectedOrder
 self.productMapList 
 self.productCollection-->
+<style>
+.st-selected{
+   background-color: #0044cc;
+   color: #ffffff;
+}
+      
+</style>
 
 <div class="alert alert-danger" ng-show="controller.error">
 	<strong>Fail!</strong>{{controller.actionMsg}}
@@ -11,32 +18,26 @@ self.productCollection-->
 	<h3>Add products to Order '{{controller.selectedOrder.summary}}'</h3>
 </div>
 
-
 <div class="panel panel-default">
 	<div class="panel-heading">Products Ordered</div>
 	<div class="panel-body">
-		<table st-table="controller.displayProductListCollection" class="table table-bordered table-align" st-safe-src="controller.productMapList" >
-			<thead>
+		<table class="table table-bordered table-align" >
+			
 			<tr>
-				<th st-sort="id">Product ID</th>
-				<th st-sort="name">Product Name</th>
-				<th st-sort="fob">F.O.B</th>
-				<th st-sort="qty">Quantity</th>
+				<th>Product ID</th>
+				<th>Product Name</th>
+				<th>F.O.B</th>
+				<th>Quantity</th>
 			</tr>
-			<tr>
-				<th colspan="5"><input st-search="" class="form-control" placeholder="global search ..." type="text"/></th>
+		
+			
+			<tr ng-repeat="productRow in controller.productMapList">
+				<td>{{productRow.id}}</td>
+				<td>{{productRow.name}}</td>
+				<td  align="right">{{productRow.fob | currency}}</td>
+				<td  align="right">{{productRow.qty}}</td>
 			</tr>
-			</thead>
-			<tbody>
-				<tr ng-repeat="productRow in controller.displayProductListCollection">
-					<td>{{productRow.id}}</td>
-					<td>{{productRow.name}}</td>
-					<td  align="right">{{productRow.fob | currency}}</td>
-					<td  align="right">{{productRow.qty}}</td>
-				</tr>
-			</tbody>
 		</table>
-
 	</div>
 </div>
 
@@ -45,7 +46,7 @@ self.productCollection-->
 <div class="container">
 	<form role="form">
 		<div class="form-group">
-			<label class="col-sm-2 control-label">Products</label>
+			<label class="col-sm-2 control-label">Select One Product</label>
 			<div  class="col-sm-10">
 				<table st-table="controller.displayCollection" class="table table-bored table-align" st-safe-src="controller.productCollection" >
 					<thead>
@@ -59,7 +60,7 @@ self.productCollection-->
 					</tr>
 					</thead>
 					<tbody>
-					<tr st-select-row="row" ng-repeat="row in controller.displayCollection">
+					<tr st-select-row="row"  st-select-mode="single" ng-repeat="row in controller.displayCollection">
 						<td>{{row.id}}</td>
 						<td>{{row.name}}</td>
 						<td  align="right">{{row.fob | currency}}</td>
@@ -74,7 +75,7 @@ self.productCollection-->
 				<input type="text" class="form-control" ng-model="controller.qty"/>
 			</div>
 		</div>
-		
+		<div class="divider"></div>
 		<div class="form-group">
 			<div class="col-sm-2 control-label"></div>
 			<div  class="col-sm-10">
@@ -82,5 +83,7 @@ self.productCollection-->
 			</div>
 		</div>
 	</form>		
+	<br/>
+	<br/>
 </div>
 

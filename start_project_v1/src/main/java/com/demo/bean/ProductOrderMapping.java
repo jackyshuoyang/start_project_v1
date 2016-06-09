@@ -22,4 +22,5 @@ public class ProductOrderMapping {
 	public int productId;
 	
 	public int qty;
+	public boolean valid=true;
 }
