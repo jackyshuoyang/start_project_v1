@@ -36,10 +36,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
 
+import com.demo.bean.EventLog;
 import com.demo.bean.ProcurementOrder;
 import com.demo.bean.Product;
 import com.demo.bean.ProductOrderMapping;
 import com.demo.bean.ProductsInOrder;
+import com.demo.dao.EventLogDAO;
 import com.demo.dao.ProcurementOrderDAO;
 import com.demo.dao.ProductDAO;
 import com.demo.dao.ProductOrderMappingDAO;
@@ -63,6 +65,20 @@ public class StartProjectV1Application {
 		SpringApplication.run(StartProjectV1Application.class, args);
 		
 	}
+	
+	@RequestMapping("/insert_log_to_order")
+	public int saveLogForOrder(@RequestBody EventLog log){
+		EventLogDAO evtDAO = appContext.getBean(EventLogDAO.class);
+		return evtDAO.save(log);
+	}
+	
+	@RequestMapping("/get_logs_for_order")
+	public List<EventLog>getLogsForOrderByOrder(@RequestBody int orderId){
+		EventLogDAO eventLogDAO = appContext.getBean(EventLogDAO.class);
+		return eventLogDAO.getOrderEventLog(orderId);
+		
+	}
+	
 	@RequestMapping("/get_products_for_order")
 	public List<ProductsInOrder> getProductsByOrderId(@RequestBody int orderId)
 	{
@@ -192,7 +208,7 @@ public class StartProjectV1Application {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			http.httpBasic().and().authorizeRequests()
-					.antMatchers("/index.html", "/home.html", "/login.html","/add_product.html","/productlist.html","/procurement_order.html", "/order_details.html","/create_order.html","/show_line.html","/").permitAll().anyRequest()
+					.antMatchers("/index.html", "/home.html", "/login.html","/add_product.html","/productlist.html","/procurement_order.html", "/order_details.html","/create_order.html","/show_line.html","add_log_to_order.html","/").permitAll().anyRequest()
 					.authenticated().and().csrf()
 					.csrfTokenRepository(csrfTokenRepository()).and()
 					.addFilterAfter(csrfHeaderFilter(), CsrfFilter.class);

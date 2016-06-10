@@ -30,8 +30,13 @@ public class EventLog {
 	public int referralId;// either be procurement id or shipment id.
 	
 	@Column(name="level_of_emergency")
-	public int levelOfEmergency;//1,super urgent. 2,urgent. 3, normal.
+	public int levelOfEmergency;//1,normal. 2,urgent.
 	
 	@Column(name="document_url")
 	public String documentUrl;
+	
+	@Column(name="action_type")
+	public int actionType;
+	
+	public boolean valid;
 }

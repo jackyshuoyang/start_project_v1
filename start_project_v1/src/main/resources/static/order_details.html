@@ -132,7 +132,23 @@
 				</tr>
 			</tbody>
 		</table>
-
 	</div>
 </div>
+
+
+<div class="panel panel-default">
+	<div class="panel-heading">Order Log History</div>
+	<div class="panel-body">
+	<div>
+    	<button type="button" class="btn btn-primary"  onclick="location.href='#/add_log_to_order';">Add Log</button>
+    <br/>
+    <br/>
+    	<div class="alert alert-info fade in">
+			<strong>Note! </strong> Changing Log Event leads to changes on order's status. For Example, adding contract-Signoff Event will Change the order status from negotiating to in-progress, and also set the start date to be the log event date.
+		</div>
+		<br/>
+		<div ng-include="'show_line.html'"></div>
+	</div>
+</div>
+
 

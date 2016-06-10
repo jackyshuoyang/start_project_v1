@@ -37,12 +37,11 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 		templateUrl: 'add_product_to_order.html',
 		controller: 'addProductToOrderCtrl',
 		controllerAs:'controller'
-	}).when('/show_line',{
-		templateUrl: 'show_line.html',
-		controller: 'showlineCtrl',
+	}).when('/add_log_to_order',{
+		templateUrl: 'add_log_to_order.html',
+		controller: 'addLogToOrderCtrl',
 		controllerAs:'controller'
-	}).
-	otherwise('/');
+	}).otherwise('/');
 
 	$httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 }).service('addProductToOrderService',function(){
@@ -235,8 +234,8 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 	self.order=procurementOrderShareService.selectedOrder;
 	var orderMemoto = clone(self.order);
 	var productCollection=[];
-	
-	
+	var eventList=[];
+	console.log("start to load logs");
 	var res = $http.post("/get_products_for_order",self.order.id);
 	res.success(function(data,status,headers,config){
 		self.productCollection = data;
@@ -252,6 +251,22 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 			updateProcurementOrder();
 		}
 	});
+	
+	var res2 = $http.post("/get_logs_for_order",self.order.id);
+	res2.success(function(data,status,headers,config){
+		self.eventList = data;
+		console.log("eventList");
+		console.log(self.eventList);
+		
+	});
+	
+	self.removeEvent=function(event){
+		//todo:
+	};
+	
+	self.viewEvent=function(event){
+		//todo:
+	};
 	
 	self.revertValue = function(){
 		self.order = orderMemoto;
@@ -332,6 +347,38 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 			self.actionMsg = "There is something wrong with updating this orders.[Details: "+data+"]";
 		});
 	};
+	
+}).controller('addLogToOrderCtrl',function($http,$window,procurementOrderShareService){
+	self = this;
+	self.newEvent={};
+	self.newEvent.dateOfLogging = new Date();
+	self.newEvent.type = 1;
+	self.newEvent.levelOfEmergencyBoolean = false;
+	self.newEvent.levelOfEmergency = 1;
+	self.newEvent.valid = true;
+	self.newEvent.referralId = procurementOrderShareService.selectedOrder.id;
+	self.selectedOrder = procurementOrderShareService.selectedOrder;
+	console.log("addLogToOrderCtrl");
+	console.log(self.newEvent);
+	self.addLogToOrder = function(){
+		if(self.newEvent.levelOfEmergencyBoolean) self.newEvent.levelOfEmergency=2;
+		var res = $http.post('/insert_log_to_order',self.newEvent);
+		res.success(function(data,status,headers,config){
+			if(self.newEvent.actionType==2){
+				self.selectedOrder.startDate = self.newEvent.dateOfEvent;
+				self.selectedOrder.status = 1;//in progress.
+			}
+			procurementOrderShareService.selectedOrder = self.selectedOrder;
+			$window.location.href = '#/view_procurement_order';
+		});
+		
+		res.error(function(data,status,headers,config){
+			self.error = true;
+			self.actionMsg = "There is something wrong with adding event log!";
+		});
+	};
+	
+	
 	
 }).controller('addProductToOrderCtrl',function($http,$window,addProductToOrderService,procurementOrderShareService){
 	self = this;

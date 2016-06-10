@@ -39,6 +39,7 @@
 				<value>com.demo.bean.Product</value>
 				<value>com.demo.bean.ProcurementOrder</value>
 				<value>com.demo.bean.ProductOrderMapping</value>
+				<value>com.demo.bean.EventLog</value>
 			</list>
 		</property>
 		<property name="hibernateProperties">
