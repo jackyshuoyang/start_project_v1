@@ -1,7 +1,11 @@
 package com.demo;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Principal;
+import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,7 +19,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.rowset.serial.SerialBlob;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -24,6 +30,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.core.annotation.Order;
+import org.springframework.format.datetime.DateFormatter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.csrf.CsrfFilter;
@@ -32,15 +39,21 @@ import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.WebUtils;
 
+import com.demo.bean.Document;
 import com.demo.bean.EventLog;
 import com.demo.bean.ProcurementOrder;
 import com.demo.bean.Product;
 import com.demo.bean.ProductOrderMapping;
 import com.demo.bean.ProductsInOrder;
+import com.demo.dao.DocumentDAO;
 import com.demo.dao.EventLogDAO;
 import com.demo.dao.ProcurementOrderDAO;
 import com.demo.dao.ProductDAO;
@@ -64,6 +77,32 @@ public class StartProjectV1Application {
 		
 		SpringApplication.run(StartProjectV1Application.class, args);
 		
+	}
+	
+	
+	/**
+	 * Upload multiple file using Spring Controller
+	 */
+	@RequestMapping("/uploadFile")
+	public int uploadMultipleFileHandler(
+			@RequestParam MultipartFile file) {
+		Document doc;
+		int returnId = -1;
+		try{
+			doc = new Document();
+			Date currentTime = new Date();
+			
+			byte[] fileByte = file.getBytes();
+			Blob blob = new SerialBlob(fileByte);
+			doc.setFileName(currentTime.getTime() +"_"+file.getOriginalFilename());
+			doc.setCreationTime(currentTime);
+			doc.setContent(blob);
+			DocumentDAO docDAO = appContext.getBean(DocumentDAO.class);
+			returnId = docDAO.save(doc);
+		}catch(Exception e){
+			return -1;
+		}
+		return returnId;
 	}
 	
 	@RequestMapping("/insert_log_to_order")

@@ -1,5 +1,5 @@
 
-angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvider, $httpProvider) {
+angular.module('hello', [ 'ngRoute','smart-table','ngFileUpload' ]).config(function($routeProvider, $httpProvider) {
 
 	$routeProvider.when('/', {
 		templateUrl : 'home.html',
@@ -235,14 +235,11 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 	var orderMemoto = clone(self.order);
 	var productCollection=[];
 	var eventList=[];
-	console.log("start to load logs");
 	var res = $http.post("/get_products_for_order",self.order.id);
 	res.success(function(data,status,headers,config){
 		self.productCollection = data;
 		
 		addProductToOrderService.productMapList = self.productCollection;
-		console.log("addProductToOrderService:");
-		console.log(addProductToOrderService.productMapList);
 		var totalFob = calculateOrderFobFromProductSum();
 		
 		if(self.order.fob!==totalFob){
@@ -255,8 +252,6 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 	var res2 = $http.post("/get_logs_for_order",self.order.id);
 	res2.success(function(data,status,headers,config){
 		self.eventList = data;
-		console.log("eventList");
-		console.log(self.eventList);
 		
 	});
 	
@@ -348,7 +343,7 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 		});
 	};
 	
-}).controller('addLogToOrderCtrl',function($http,$window,procurementOrderShareService){
+}).controller('addLogToOrderCtrl',function($http,$window,$timeout,Upload,procurementOrderShareService){
 	self = this;
 	self.newEvent={};
 	self.newEvent.dateOfLogging = new Date();
@@ -358,10 +353,53 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 	self.newEvent.valid = true;
 	self.newEvent.referralId = procurementOrderShareService.selectedOrder.id;
 	self.selectedOrder = procurementOrderShareService.selectedOrder;
-	console.log("addLogToOrderCtrl");
-	console.log(self.newEvent);
+	
+	
+	self.newDocIdArray = [];
+	self.uploadFiles=function(files,errFiles){
+		
+		self.files = files;
+		self.errFiles = errFiles;
+
+		
+		angular.forEach(files,function(file){
+
+			file.upload = Upload.upload({
+				url:'http://localhost:8080/uploadFile',
+				data:{file:file}
+			});
+			
+			file.upload.then(function(response){
+				$timeout(function(){
+					file.result = response.result;
+					self.newDocIdArray.push(response.data);
+					console.log("after uploading hash");
+					console.log(self.newDocIdArray);
+				});
+			},function(response){
+				if (response.status > 0){
+					self.error = true;
+					self.actionMsg = response.status + ': ' + response.data;
+				}
+                    
+			},function(evt){
+				file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+			})
+		});
+	};
+	
+	
 	self.addLogToOrder = function(){
 		if(self.newEvent.levelOfEmergencyBoolean) self.newEvent.levelOfEmergency=2;
+		var file;
+		var docString='';
+		for(var i=0;i<self.newDocIdArray.length;i++){
+			docString += self.newDocIdArray[i]+',';
+		}
+		self.newEvent.documentUrl = docString;
+		console.log("newEvent :");
+		console.log(self.newEvent);
+		
 		var res = $http.post('/insert_log_to_order',self.newEvent);
 		res.success(function(data,status,headers,config){
 			if(self.newEvent.actionType==2){
@@ -384,8 +422,6 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 	self = this;
 	self.selectedOrder = procurementOrderShareService.selectedOrder;
 	self.productMapList = addProductToOrderService.productMapList;
-	console.log("addProductTOOrderCTRL : ");
-	console.log(addProductToOrderService.productMapList);
 	
 	self.qty=0;
 	loadAllProducts();
@@ -426,13 +462,10 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 		}else{
 			var sendingMap={};
 			sendingMap.id=0;
-			console.log(" productSelected.id :");
 			console.log(productSelected[0]);
 			sendingMap.productId = productSelected[0].id;
 			sendingMap.orderId = self.selectedOrder.id;
 			sendingMap.qty = self.qty;
-			console.log(" sendingMap :");
-			console.log(sendingMap);
 			var res = $http.post("/insert_product_to_order",sendingMap);
 			res.success(function(data,status,headers,config){
 				procurementOrderShareService.selectedOrder = self.selectedOrder;
@@ -466,12 +499,7 @@ angular.module('hello', [ 'ngRoute','smart-table' ]).config(function($routeProvi
 			productOrderMapping.orderId = self.orderId;
 			productOrderMapping.productId = self.productId;
 			productOrderMapping.qty = self.qty;
-			console.log("fire  ->self:: orderid"+self.orderId);
-			console.log("fire ->self:: productId"+self.productId);
-			console.log("fire ->self:: qty"+self.qty);
-			console.log("fire  ->productOrderMapping:: orderid "+productOrderMapping.orderId);
-			console.log("fire ->productOrderMapping:: pid "+productOrderMapping.productId);
-			console.log("fire ->productOrderMapping:: qty "+productOrderMapping.qty);
+			
 			var res = $http.post("/updateProductQtyForOrder",productOrderMapping);
 			res.success(function(data,status,headers,config){
 				procurementOrderShareService.selectedOrder = self.selectedOrder;
