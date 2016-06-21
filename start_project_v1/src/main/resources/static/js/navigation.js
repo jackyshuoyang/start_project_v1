@@ -1,5 +1,5 @@
 
-angular.module('hello', [ 'ngRoute','smart-table','ngFileUpload' ]).config(function($routeProvider, $httpProvider) {
+angular.module('hello', [ 'ngRoute','smart-table','ngFileUpload']).config(function($routeProvider, $httpProvider) {
 
 	$routeProvider.when('/', {
 		templateUrl : 'home.html',
@@ -252,8 +252,19 @@ angular.module('hello', [ 'ngRoute','smart-table','ngFileUpload' ]).config(funct
 	var res2 = $http.post("/get_logs_for_order",self.order.id);
 	res2.success(function(data,status,headers,config){
 		self.eventList = data;
-		
 	});
+	
+
+	
+	self.download = function(fileLink,event){
+
+		var index = event.fileNames.indexOf(fileLink);
+		var documentUrlArray = event.documentUrl.split(",");
+		var docId = parseInt(documentUrlArray[index]);
+		console.log(docId);
+		$window.location.href = '/download?documentId=' +docId;
+
+	};
 	
 	self.removeEvent=function(event){
 		//todo:

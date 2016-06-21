@@ -60,10 +60,23 @@
 	  		<td></td>
 	  		<td class="lefttd"></td>
 	  		<td></td>
-		    <td class="righttd"></td>
-		    <td class="bottomtd righttd nametd">{{event.log}}
+		    <td></td>
+		    <td class="righttd lefttd nametd">{{event.log}}
 		    </td>
 	  	</tr>
+	  	
+	  	<tr>
+	  		<td></td>
+	  		<td class="lefttd"></td>
+	  		<td></td>
+		    <td class="righttd"></td>
+		    <td class="bottomtd righttd nametd">
+		    	<p ng-repeat="filelink in event.fileNames">
+		    		<button ng-click="controller.download(filelink,event)" class="btn btn-link">{{filelink}}</button>
+		    	</p>
+		    </td>
+	  	</tr>
+	  	
 	  	<tr height=50>
 	  		<td></td>
 	  		<td class="lefttd"></td>

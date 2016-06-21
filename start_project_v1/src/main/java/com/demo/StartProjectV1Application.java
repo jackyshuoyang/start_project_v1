@@ -4,9 +4,13 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.Principal;
 import java.sql.Blob;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +41,7 @@ import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -49,6 +54,7 @@ import org.springframework.web.util.WebUtils;
 
 import com.demo.bean.Document;
 import com.demo.bean.EventLog;
+import com.demo.bean.EventLogWithFilenames;
 import com.demo.bean.ProcurementOrder;
 import com.demo.bean.Product;
 import com.demo.bean.ProductOrderMapping;
@@ -68,6 +74,8 @@ public class StartProjectV1Application {
 		super();
 		
 	}
+	
+	private static final int BUFFER_SIZE = 4096;
 	
 	@Autowired
 	private ApplicationContext appContext;
@@ -97,6 +105,8 @@ public class StartProjectV1Application {
 			doc.setFileName(currentTime.getTime() +"_"+file.getOriginalFilename());
 			doc.setCreationTime(currentTime);
 			doc.setContent(blob);
+			doc.setContentType(file.getContentType());
+			doc.setFileSize(file.getSize());
 			DocumentDAO docDAO = appContext.getBean(DocumentDAO.class);
 			returnId = docDAO.save(doc);
 		}catch(Exception e){
@@ -112,10 +122,65 @@ public class StartProjectV1Application {
 	}
 	
 	@RequestMapping("/get_logs_for_order")
-	public List<EventLog>getLogsForOrderByOrder(@RequestBody int orderId){
+	public List<EventLogWithFilenames> getLogsForOrderByOrder(@RequestBody int orderId){
 		EventLogDAO eventLogDAO = appContext.getBean(EventLogDAO.class);
-		return eventLogDAO.getOrderEventLog(orderId);
 		
+		List<EventLog>eventList =  eventLogDAO.getOrderEventLog(orderId);
+		List<EventLogWithFilenames> returnList = new ArrayList<EventLogWithFilenames>();
+		for(EventLog e : eventList){
+			EventLogWithFilenames eventWithFN = EventLogWithFilenames.construct(e);
+			if(e.documentUrl!=null && (!e.documentUrl.equals(""))){
+				eventWithFN.fileNames = Arrays.asList(constructFileNameArray(e.documentUrl));
+			}
+			returnList.add(eventWithFN);
+		}
+		return returnList;
+	}
+	
+	
+	/**
+	 * @param docUrl
+	 * @return
+	 */
+	private String[] constructFileNameArray(String docUrl){
+		String [] idArray = docUrl.split(",");
+		String [] returnArray=new String[idArray.length];
+		DocumentDAO docDAO = appContext.getBean(DocumentDAO.class);
+		for(int i=0;i<idArray.length;i++){
+			returnArray[i] = docDAO.getFileNameById(Integer.parseInt(idArray[i]));
+		}
+		return returnArray;
+	}
+	
+	
+	/**
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value="/download" , method=RequestMethod.GET)
+	public void downloadFile(HttpServletRequest request,HttpServletResponse response) throws IOException
+	{
+		String stId = request.getParameter("documentId");
+		DocumentDAO docDao = appContext.getBean(DocumentDAO.class);
+		Document d = docDao.getFileById(Integer.parseInt(stId));
+		
+		try {
+			InputStream inputStream = d.getContent().getBinaryStream();
+			
+			response.setContentLength((int)d.getFileSize());
+			response.setContentType(d.getContentType());
+			// set headers for the response
+			String nameValue = "attachment; filename=\""+d.getFileName()+"\"";
+	        response.setHeader("Content-Disposition", nameValue);
+	        
+	        FileCopyUtils.copy(inputStream, response.getOutputStream());
+	        
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@RequestMapping("/get_products_for_order")

@@ -26,6 +26,28 @@ public class Document {
 	@Column(name="creation_time")
 	private Date creationTime;
 	
+	@Column(name="content_type")
+	private String contentType;
+	
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	public long getFileSize() {
+		return fileSize;
+	}
+
+	public void setFileSize(long fileSize) {
+		this.fileSize = fileSize;
+	}
+
+	@Column(name="file_size")
+	private long fileSize;
+	
 	
 	
 	public Integer getId() {
