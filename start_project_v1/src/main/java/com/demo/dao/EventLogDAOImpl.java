@@ -62,7 +62,10 @@ public class EventLogDAOImpl implements EventLogDAO {
 
 	@Override
 	public int delete(int id) {
-		// TODO Auto-generated method stub
+		Session session = this.sessionFactory.openSession();
+		Query q = session.createSQLQuery("update event_log set valid = false where id=:eId");
+		q.setParameter("eId", id);
+		q.executeUpdate();
 		return 0;
 	}
 

@@ -267,7 +267,17 @@ angular.module('hello', [ 'ngRoute','smart-table','ngFileUpload']).config(functi
 	};
 	
 	self.removeEvent=function(event){
-		//todo:
+		//1 remove event from server side 
+		var removeRes = $http.post('/remove_event',event.id);
+		//2 if successfully removed , do it on client side.
+		removeRes.success(function(data,status,headers,config){
+			var index = self.eventList.indexOf(event);
+			self.eventList.splice(index,1);
+		});
+		removeRes.error(function(data,status,headers,config){
+			self.error =true;
+			self.actionMsg = "Can not delete this event log.";
+		});
 	};
 	
 	self.viewEvent=function(event){
@@ -364,7 +374,7 @@ angular.module('hello', [ 'ngRoute','smart-table','ngFileUpload']).config(functi
 	self.newEvent.valid = true;
 	self.newEvent.referralId = procurementOrderShareService.selectedOrder.id;
 	self.selectedOrder = procurementOrderShareService.selectedOrder;
-	
+	self.uploadFileCount=0;
 	
 	self.newDocIdArray = [];
 	self.uploadFiles=function(files,errFiles){
@@ -374,7 +384,8 @@ angular.module('hello', [ 'ngRoute','smart-table','ngFileUpload']).config(functi
 
 		
 		angular.forEach(files,function(file){
-
+			self.uploadFileCount++;
+			checkToDisableOrEnableAddButton();
 			file.upload = Upload.upload({
 				url:'http://localhost:8080/uploadFile',
 				data:{file:file}
@@ -384,13 +395,17 @@ angular.module('hello', [ 'ngRoute','smart-table','ngFileUpload']).config(functi
 				$timeout(function(){
 					file.result = response.result;
 					self.newDocIdArray.push(response.data);
-					console.log("after uploading hash");
-					console.log(self.newDocIdArray);
+					self.uploadFileCount--;
+					console.log("self.uploadFileCount : "+self.uploadFileCount);
+					checkToDisableOrEnableAddButton();
 				});
 			},function(response){
 				if (response.status > 0){
 					self.error = true;
 					self.actionMsg = response.status + ': ' + response.data;
+					self.uploadFileCount--;
+					console.log("self.uploadFileCount : "+self.uploadFileCount);
+					checkToDisableOrEnableAddButton();
 				}
                     
 			},function(evt){
@@ -399,6 +414,11 @@ angular.module('hello', [ 'ngRoute','smart-table','ngFileUpload']).config(functi
 		});
 	};
 	
+	function checkToDisableOrEnableAddButton(){
+		
+		document.getElementById('addNewLogBtn').disable = (self.uploadFileCount>0);
+		console.log("check button : " +document.getElementById('addNewLogBtn').disable);
+	}
 	
 	self.addLogToOrder = function(){
 		if(self.newEvent.levelOfEmergencyBoolean) self.newEvent.levelOfEmergency=2;

@@ -90,10 +90,11 @@ public class StartProjectV1Application {
 	
 	/**
 	 * Upload multiple file using Spring Controller
+	 * @throws Exception 
 	 */
 	@RequestMapping("/uploadFile")
 	public int uploadMultipleFileHandler(
-			@RequestParam MultipartFile file) {
+			@RequestParam MultipartFile file) throws Exception {
 		Document doc;
 		int returnId = -1;
 		try{
@@ -110,7 +111,9 @@ public class StartProjectV1Application {
 			DocumentDAO docDAO = appContext.getBean(DocumentDAO.class);
 			returnId = docDAO.save(doc);
 		}catch(Exception e){
-			return -1;
+			System.out.println("uploadMultipleFileHandler : " +e.toString());
+			throw new Exception("uploadMultipleFileHandler : " +e.toString());
+			
 		}
 		return returnId;
 	}
@@ -119,6 +122,12 @@ public class StartProjectV1Application {
 	public int saveLogForOrder(@RequestBody EventLog log){
 		EventLogDAO evtDAO = appContext.getBean(EventLogDAO.class);
 		return evtDAO.save(log);
+	}
+	
+	@RequestMapping("/remove_event")
+	public void deleteEvent(@RequestBody int eventId){
+		EventLogDAO evtDao = appContext.getBean(EventLogDAO.class);
+		evtDao.delete(eventId);
 	}
 	
 	@RequestMapping("/get_logs_for_order")
