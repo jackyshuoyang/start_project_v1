@@ -8,6 +8,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import com.demo.bean.Cost;
+import com.demo.bean.JobCostMap;
 
 public class JobCostMapDAOImpl implements JobCostMapDAO {
 
@@ -16,11 +17,11 @@ public class JobCostMapDAOImpl implements JobCostMapDAO {
 		this.sessionFactory = sessionFactory;
 	}
 	@Override
-	public List<Cost> getCostForJob(int jobId) {
+	public List<JobCostMap> getCostForJob(int jobId) {
 		Session session = this.sessionFactory.openSession();
-		Query q = session.createQuery("from Cost where job_id=:jId");
+		Query q = session.createQuery("from JobCostMap where job_id=:jId");
 		q.setParameter("jId", jobId);
-		List<Cost>returnL = q.list();
+		List<JobCostMap>returnL = q.list();
 		session.close();
 		return returnL;
 	}

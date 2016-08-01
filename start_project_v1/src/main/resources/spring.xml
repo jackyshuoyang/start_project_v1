@@ -41,6 +41,13 @@
 				<value>com.demo.bean.ProductOrderMapping</value>
 				<value>com.demo.bean.EventLog</value>
 				<value>com.demo.bean.Document</value>
+				<value>com.demo.bean.Shipment</value>
+				<value>com.demo.bean.Cost</value>
+				<value>com.demo.bean.Job</value>
+				<value>com.demo.bean.JobCostMap</value>
+				<value>com.demo.bean.ShipmentJobMap</value>
+				<value>com.demo.bean.ShipmentOrderMap</value>
+				
 			</list>
 		</property>
 		<property name="hibernateProperties">
@@ -70,6 +77,28 @@
 		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
 	</bean>
 	
+	<bean id="shipmentDAO" class="com.demo.dao.ShipmentDAOImpl">
+		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
+	</bean>
+	
+	<bean id="costDAO" class="com.demo.dao.CostDAOImpl">
+		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
+	</bean>
 
+	<bean id="jobDAO" class="com.demo.dao.JobDAOImpl">
+		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
+	</bean>
+	
+	<bean id="jobCostMapDAO" class="com.demo.dao.JobCostMapDAOImpl">
+		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
+	</bean>
+	
+	<bean id="shipmentJobMapDAO" class="com.demo.dao.ShipmentJobMapDAOImpl">
+		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
+	</bean>
+	
+	<bean id="shipmentOrderMapDAO" class="com.demo.dao.ShipmentOrderMapDAOImpl">
+		<property name="sessionFactory" ref="hibernate3AnnotatedSessionFactory" />
+	</bean>
 	
 </beans>

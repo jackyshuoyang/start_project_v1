@@ -52,18 +52,29 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.WebUtils;
 
+import com.demo.bean.Cost;
+import com.demo.bean.DisplayShipment;
 import com.demo.bean.Document;
 import com.demo.bean.EventLog;
 import com.demo.bean.EventLogWithFilenames;
+import com.demo.bean.Job;
+import com.demo.bean.JobCostMap;
 import com.demo.bean.ProcurementOrder;
 import com.demo.bean.Product;
 import com.demo.bean.ProductOrderMapping;
 import com.demo.bean.ProductsInOrder;
+import com.demo.bean.Shipment;
+import com.demo.bean.ShipmentJobMap;
+import com.demo.dao.CostDAO;
 import com.demo.dao.DocumentDAO;
 import com.demo.dao.EventLogDAO;
+import com.demo.dao.JobCostMapDAO;
+import com.demo.dao.JobDAO;
 import com.demo.dao.ProcurementOrderDAO;
 import com.demo.dao.ProductDAO;
 import com.demo.dao.ProductOrderMappingDAO;
+import com.demo.dao.ShipmentDAO;
+import com.demo.dao.ShipmentJobMapDAO;
 
 @RestController
 @SpringBootApplication
@@ -85,6 +96,10 @@ public class StartProjectV1Application {
 		
 		SpringApplication.run(StartProjectV1Application.class, args);
 		
+	}
+	
+	public int sumup(int a,int b){
+		return a+b;
 	}
 	
 	
@@ -240,6 +255,44 @@ public class StartProjectV1Application {
 		List<Product>list = productDAO.list();
 		return list;
 	}
+	
+	@RequestMapping("/shipments")
+	public List<DisplayShipment>getShipmentList(){
+		ShipmentDAO shipmentDAO = appContext.getBean(ShipmentDAO.class);
+		List<Shipment> shipmentList = shipmentDAO.getShipmentList();
+		List<DisplayShipment>returnList = new ArrayList<DisplayShipment>();
+		DisplayShipment dShipment;
+		for(Shipment shipment :shipmentList){
+			dShipment = new DisplayShipment(shipment);
+			dShipment.cost = getCostForShipment(dShipment.getId());
+			returnList.add(dShipment);
+		}
+		return returnList;
+	}
+	
+	private float getCostForShipment(int shipmentId){
+		
+		ShipmentJobMapDAO sjDAO = appContext.getBean(ShipmentJobMapDAO.class);
+	    List<ShipmentJobMap> shipmentJobMapList = sjDAO.getJobShipmentMapByShipmentId(shipmentId);
+	    float totalCost = 0;
+	    for(ShipmentJobMap m:shipmentJobMapList){
+	    	totalCost+=getCostForJob(m.getJob_id());
+	    }
+	    return totalCost;
+	}
+	
+	private float getCostForJob(int jobId){
+		JobCostMapDAO jcMapDAO = appContext.getBean(JobCostMapDAO.class);
+		CostDAO costDAO = appContext.getBean(CostDAO.class);
+		float totalCost=0;
+		List<JobCostMap>costList = jcMapDAO.getCostForJob(jobId);
+		for(JobCostMap c : costList){
+			totalCost+=costDAO.getCostById(c.getCost_id()).getAmount();
+		}
+		return totalCost;
+	}
+	
+	
 	/**
 	 * @param id
 	 * @return
@@ -321,7 +374,7 @@ public class StartProjectV1Application {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			http.httpBasic().and().authorizeRequests()
-					.antMatchers("/index.html", "/home.html", "/login.html","/add_product.html","/productlist.html","/procurement_order.html", "/order_details.html","/create_order.html","/show_line.html","add_log_to_order.html","/").permitAll().anyRequest()
+					.antMatchers("/index.html", "/home.html", "/login.html","/add_product.html","/productlist.html","/procurement_order.html", "/order_details.html","/create_order.html","/show_line.html","add_log_to_order.html","shipment_list.html","/").permitAll().anyRequest()
 					.authenticated().and().csrf()
 					.csrfTokenRepository(csrfTokenRepository()).and()
 					.addFilterAfter(csrfHeaderFilter(), CsrfFilter.class);

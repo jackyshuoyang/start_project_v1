@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="Shipments")
+@Table(name="shipments")
 public class Shipment {
 	@Id
 	@GeneratedValue
@@ -24,8 +24,6 @@ public class Shipment {
 	private String destination;
 	
 	private Date start_date;
-	
-	private int est_duration;
 	
 	private Date est_finish_date;
 	
@@ -71,13 +69,7 @@ public class Shipment {
 		this.start_date = start_date;
 	}
 
-	public int getEst_duration() {
-		return est_duration;
-	}
 
-	public void setEst_duration(int est_duration) {
-		this.est_duration = est_duration;
-	}
 
 	public Date getEst_finish_date() {
 		return est_finish_date;

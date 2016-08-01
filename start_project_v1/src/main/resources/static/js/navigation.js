@@ -37,6 +37,10 @@ angular.module('hello', [ 'ngRoute','smart-table','ngFileUpload']).config(functi
 		templateUrl: 'add_product_to_order.html',
 		controller: 'addProductToOrderCtrl',
 		controllerAs:'controller'
+	}).when('/shipmentlist',{
+		templateUrl:'shipment_list.html',
+		controller:'shipmentCtrl',
+		controllerAs:'controller'
 	}).when('/add_log_to_order',{
 		templateUrl: 'add_log_to_order.html',
 		controller: 'addLogToOrderCtrl',
@@ -226,6 +230,25 @@ angular.module('hello', [ 'ngRoute','smart-table','ngFileUpload']).config(functi
 		});
 	};
 	
+	
+}).controller('shipmentCtrl',function($http,$window){
+	
+	self = this;
+	self.rowCollection=[];
+	$http.get('/shipments').then(function(response){
+		console.log(response.data);
+		self.rowCollection=[];
+		for(p in response.data){
+			var obj = response.data[p];
+			if(obj.est_finish_date!=null&&obj.start_date){
+				obj.est_duration = Date.daysBetween(new Date(obj.start_date),new Date(obj.est_finish_date));
+			}
+			if(obj.actual_finish_date!=null&&obj.start_date){
+				obj.actual_duration = Date.daysBetween(new Date(obj.start_date),new Date(obj.actual_finish_date));
+			}
+			self.rowCollection.push(obj);
+		}
+	});
 	
 }).controller('procurementOrderCtrl',function(procurementOrderShareService,addProductToOrderService,updateProductQtyForOrderService,$http,$scope,$window){
 	
